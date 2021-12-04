@@ -15,21 +15,21 @@ export type ActivityType =
   | "driving"
   | "cooking"
   | "studying"
-  | "workingOut"
+  | "working out"
   | "cleaning"
-  | "beingCreative"
+  | "being creative"
 
 export const ACTIVITIES = [
   { activity: "driving", displayName: "Driving" },
   { activity: "cooking", displayName: "Cooking" },
   { activity: "studying", displayName: "Studying" },
-  { activity: "workingOut", displayName: "Working out" },
+  { activity: "working out", displayName: "Working out" },
   { activity: "cleaning", displayName: "Cleaning" },
-  { activity: "beingCreative", displayName: "Being creative" },
+  { activity: "being creative", displayName: "Being creative" },
 ]
 
 const SONG_URL =
-  "http://localhost:5000/song-recommendations/api/v1.0/getsongs"
+  "https://cse6242-songlists-api.herokuapp.com/song-recommendations/api/v1.0/getsongs"
 
 interface Props {
   setSongs: Dispatch<SetStateAction<SongType[] | undefined>>
@@ -37,7 +37,7 @@ interface Props {
 
 function InputForm({ setSongs }: Props) {
   const [activity, setActivity] = React.useState<ActivityType>("driving")
-  const [age, setAge] = React.useState<number | undefined>(undefined)
+  const [age, setAge] = React.useState<string>("20")
   const [includeExplicit, setIncludeExplicit] = React.useState<boolean>(false)
 
   const getMusic = () => {
@@ -57,7 +57,7 @@ function InputForm({ setSongs }: Props) {
         numSongs: 10,
         explicitYN: includeExplicit ? "Y" : "N",
         activity,
-        ...(age && {dob_year: new Date().getFullYear() - age})
+        dob_year: new Date().getFullYear() - parseInt(age),
       }
       return Object.keys(queries)
         .reduce((result: any, key: any) => {
@@ -71,7 +71,6 @@ function InputForm({ setSongs }: Props) {
 
     // setSongs(getSampleSongs())
 
-    // TODO: uncomment when backend is updated
     fetch(SONG_URL + "?" + getQueryString())
       .then(response => {
         return response.json()
@@ -80,7 +79,7 @@ function InputForm({ setSongs }: Props) {
         const songData: SongResponseType[] = Object.values(data)
         const formattedSongData: SongType[] = songData.map(s => ({
           ...s,
-          artistName: s.artistName.replace(/\['|'\]/g, "").split("','"),
+          artistName: s.artistName.replace(/\['|'\]/g, "").split("', '"),
         }))
         setSongs(formattedSongData)
       })
@@ -89,20 +88,13 @@ function InputForm({ setSongs }: Props) {
   const handleActivityChange = (event: ChangeEvent<HTMLSelectElement>) => {
     setActivity(event.target.value as ActivityType)
   }
-  const handleAgeChange = (valueAsString: string, valueAsNumber: number) => {
-    if (isNaN(valueAsNumber)) {
-      setAge(undefined)
-    } else {
-      setAge(valueAsNumber)
-    }
-  }
   const handleIncludeExplicitChange = (
     event: ChangeEvent<HTMLInputElement>
   ) => {
     setIncludeExplicit(event.target.checked)
   }
   return (
-    <Box display="flex" flexDirection="column">
+    <Box display="flex" flexDirection="column" minW="210px">
       <Box display="flex" flexDirection="column">
         <label>
           <Text fontSize="md" whiteSpace="nowrap">
@@ -125,7 +117,9 @@ function InputForm({ setSongs }: Props) {
               size="sm"
               display="inline"
               value={age}
-              onChange={handleAgeChange}
+              min={0}
+              max={150}
+              onChange={setAge}
             >
               <NumberInputField />
             </NumberInput>
@@ -141,7 +135,7 @@ function InputForm({ setSongs }: Props) {
         </Box>
       </Box>
       <Box mt={12}>
-        <Button onClick={getMusic} colorScheme="blue">
+        <Button onClick={getMusic} colorScheme="blue" disabled={!age}>
           Get music
         </Button>
       </Box>

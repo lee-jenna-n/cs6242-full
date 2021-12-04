@@ -18,7 +18,6 @@ CORS(app)
 @app.route("/song-recommendations/api/v1.0/getsongs", methods=['GET'])
 #@cross_origin()
 def getsongList():
-    print(request.args)
 
     numSongs = 10 if request.args.get('numSongs') == None else int(request.args.get('numSongs'))
     dob_year = 0 if  request.args.get('dob_year') == None else int(request.args['dob_year'])
@@ -27,16 +26,22 @@ def getsongList():
 
     acceptedActivities = list(pd.read_parquet('data/acceptedActivities.parquet')['activity'])
 
-    # print("Activity passed", activity)
+    #print("Activity passed", activity)
     if activity == 'None' or activity not in acceptedActivities:
         return ({"error" : "Activity missing in request or different from accepted ones! Currently accepted activities are 'driving', 'cooking', 'studying', 'working out', 'cleaning', 'being creative'"})
 
-    if dob_year != 0 and (dob_year < 1900 or dob_year > 2021):
+    if dob_year < 1900 or dob_year > 2021:
         return ({"error" : "DOB Year seems to have an invalid value. Needs to be 1900 <= YYYY <= 2021"})
 
     seedIndexes = pd.read_parquet('data/seedInfo.parquet')
 
-    cluster = seedIndexes.loc[seedIndexes['Activity'] == activity]['Cluster'][0]
+#    print ("Activity passed is",activity)
+#    print ("Seed Indexes\n",seedIndexes)
+
+    cluster = seedIndexes.loc[seedIndexes['Activity'] == activity]['Cluster'].iloc[0]
+
+#    print ("Cluster is ", cluster)
+
 
     songswithcluster = pd.read_parquet('data/clusters_trimmed.parquet')
 
