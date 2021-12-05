@@ -28,8 +28,7 @@ export const ACTIVITIES = [
   { activity: "being creative", displayName: "Being creative" },
 ]
 
-const SONG_URL =
-  "https://cse6242-songlists-api.herokuapp.com/song-recommendations/api/v1.0/getsongs"
+const SONG_URL = "http://localhost:5000/song-recommendations/api/v1.0/getsongs"
 
 interface Props {
   setSongs: Dispatch<SetStateAction<SongType[] | undefined>>
